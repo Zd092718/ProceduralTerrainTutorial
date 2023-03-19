@@ -9,6 +9,10 @@ using UnityEngine;
 public class CustomTerrain : MonoBehaviour
 {
     [SerializeField] private Vector2 randomHeightRange = new Vector2(0, 0.1f);
+    [SerializeField] private Texture2D heightMapImage;
+    [SerializeField] private Vector3 heightMapScale = new Vector3(1, 1, 1);
+
+
     [SerializeField] private Terrain terrain;
     [SerializeField] private TerrainData terrainData;
 
@@ -32,6 +36,23 @@ public class CustomTerrain : MonoBehaviour
             for (int y = 0; y < heightMapResolution; y++)
             {
                 heightMap[x, y] += Random.Range(randomHeightRange.x, randomHeightRange.y);
+            }
+        }
+        terrainData.SetHeights(0, 0, heightMap);
+    }
+
+    public void LoadTexture()
+    {
+        float[,] heightMap;
+        int heightMapResolution = terrainData.heightmapResolution;
+        heightMap = terrainData.GetHeights(0, 0, heightMapResolution, heightMapResolution);
+        for (int x = 0; x < heightMapResolution; x++)
+        {
+            for (int z = 0; z < heightMapResolution; z++)
+            {
+                heightMap[x, z] = heightMapImage.GetPixel((int)(x * heightMapScale.x),
+                                                          (int)(z * heightMapScale.z))
+                                                          .grayscale * heightMapScale.y;
             }
         }
         terrainData.SetHeights(0, 0, heightMap);
