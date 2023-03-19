@@ -8,6 +8,15 @@ using UnityEngine;
 
 public class CustomTerrain : MonoBehaviour
 {
+    [SerializeField] private Vector2 randomHeightRange = new Vector2(0, 0.1f);
+
+    public Vector2 RandomHeightRange { get => randomHeightRange; set => randomHeightRange = value; }
+
+    public void RandomTerrain()
+    {
+
+    }
+
     private void Awake()
     {
         SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
