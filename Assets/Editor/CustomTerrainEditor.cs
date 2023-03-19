@@ -33,13 +33,17 @@ public class CustomTerrainEditor : Editor
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             GUILayout.Label("Set Heights Between Random Values", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(randomHeightRange);
-            if(GUILayout.Button("Random Heights"))
+            if (GUILayout.Button("Random Heights"))
             {
                 terrain.RandomTerrain();
             }
         }
 
-
+        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+        if (GUILayout.Button("Reset Terrain"))
+        {
+            terrain.ResetTerrain();
+        }
 
         serializedObject.ApplyModifiedProperties();
     }
@@ -47,12 +51,12 @@ public class CustomTerrainEditor : Editor
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 }
