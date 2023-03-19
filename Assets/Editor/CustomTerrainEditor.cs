@@ -14,10 +14,15 @@ public class CustomTerrainEditor : Editor
     private SerializedProperty randomHeightRange;
     private SerializedProperty heightMapScale;
     private SerializedProperty heightMapImage;
+    private SerializedProperty perlinXScale;
+    private SerializedProperty perlinYScale;
+    private SerializedProperty perlinOffsetX;
+    private SerializedProperty perlinOffsetY;
 
     //fold outs ---------------------------------
     private bool showRandom = false;
     private bool showLoadHeights = false;
+    private bool showPerlinNoise = false;
 
 
 
@@ -28,6 +33,10 @@ public class CustomTerrainEditor : Editor
         randomHeightRange = serializedObject.FindProperty("randomHeightRange");
         heightMapScale = serializedObject.FindProperty("heightMapScale");
         heightMapImage = serializedObject.FindProperty("heightMapImage");
+        perlinXScale = serializedObject.FindProperty("perlinXScale");
+        perlinYScale = serializedObject.FindProperty("perlinYScale");
+        perlinOffsetY = serializedObject.FindProperty("perlinOffsetY");
+        perlinOffsetX = serializedObject.FindProperty("perlinOffsetX");
     }
 
     public override void OnInspectorGUI()
@@ -48,15 +57,30 @@ public class CustomTerrainEditor : Editor
         }
 
         showLoadHeights = EditorGUILayout.Foldout(showLoadHeights, "Load Heights");
-        if(showLoadHeights)
+        if (showLoadHeights)
         {
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             GUILayout.Label("Load Heights From Texture", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(heightMapImage);
             EditorGUILayout.PropertyField(heightMapScale);
-            if(GUILayout.Button("Load Texture"))
+            if (GUILayout.Button("Load Texture"))
             {
                 terrain.LoadTexture();
+            }
+        }
+
+        showPerlinNoise = EditorGUILayout.Foldout(showPerlinNoise, "Single Perlin Noise");
+        if (showPerlinNoise)
+        {
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+            GUILayout.Label("Perlin Noise", EditorStyles.boldLabel);
+            EditorGUILayout.Slider(perlinXScale, 0, 0.1f, new GUIContent("X Scale"));
+            EditorGUILayout.Slider(perlinYScale, 0, 0.1f, new GUIContent("Y Scale"));
+            EditorGUILayout.IntSlider(perlinOffsetX, 0, 10000, new GUIContent("X Offset"));
+            EditorGUILayout.IntSlider(perlinOffsetY, 0, 10000, new GUIContent("Y Offset"));
+            if (GUILayout.Button("Add Perlin Noise"))
+            {
+                terrain.Perlin();
             }
         }
 

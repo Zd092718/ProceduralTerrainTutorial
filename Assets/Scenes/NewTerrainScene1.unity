@@ -248,7 +248,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ab93f3ea0028cb4fae8e8dc67cc50df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  randomHeightRange: {x: 0, y: 0.1}
+  randomHeightRange: {x: 0, y: 0.3}
+  heightMapImage: {fileID: 2800000, guid: 1a59f8ba43025a14f9a771a5f14b2147, type: 3}
+  heightMapScale: {x: 1.8, y: 1, z: 1.8}
   terrain: {fileID: 1914014073}
   terrainData: {fileID: 15600000, guid: c494203ce34c24740b83c64288063de0, type: 2}
 --- !u!154 &1914014072

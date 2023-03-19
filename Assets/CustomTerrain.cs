@@ -8,17 +8,25 @@ using UnityEngine;
 
 public class CustomTerrain : MonoBehaviour
 {
+    //Height Map Properties ---------------------------------------------------
     [SerializeField] private Vector2 randomHeightRange = new Vector2(0, 0.1f);
     [SerializeField] private Texture2D heightMapImage;
     [SerializeField] private Vector3 heightMapScale = new Vector3(1, 1, 1);
+
+    //PERLIN NOISE ----------------------------------------------------------
+    [SerializeField] private float perlinXScale = 0.01f;
+    [SerializeField] private float perlinYScale = 0.01f;
+    [SerializeField] private int perlinOffsetX = 0;
+    [SerializeField] private int perlinOffsetY = 0;
+
 
 
     [SerializeField] private Terrain terrain;
     [SerializeField] private TerrainData terrainData;
 
-    public Vector2 RandomHeightRange { get => randomHeightRange; set => randomHeightRange = value; }
-    public Terrain Terrain { get => terrain; set => terrain = value; }
-    public TerrainData TerrainData { get => terrainData; set => terrainData = value; }
+    //public Vector2 RandomHeightRange { get => randomHeightRange; set => randomHeightRange = value; }
+    //public Terrain Terrain { get => terrain; set => terrain = value; }
+    //public TerrainData TerrainData { get => terrainData; set => terrainData = value; }
 
     private void OnEnable()
     {
@@ -26,6 +34,20 @@ public class CustomTerrain : MonoBehaviour
         terrain = this.GetComponent<Terrain>();
         terrainData = terrain.terrainData;
     }
+    public void Perlin()
+    {
+        int heightMapResolution = terrainData.heightmapResolution;
+        float[,] heightMap = terrainData.GetHeights(0, 0, heightMapResolution, heightMapResolution);
+        for (int y = 0; y < heightMapResolution; y++)
+        {
+            for (int x = 0; x < heightMapResolution; x++)
+            {
+                heightMap[x, y] = Mathf.PerlinNoise((x + perlinOffsetX) * perlinXScale, (y + perlinOffsetY) * perlinYScale);
+            }
+        }
+        terrainData.SetHeights(0, 0, heightMap);
+    }
+
     public void RandomTerrain()
     {
         float[,] heightMap;
@@ -40,6 +62,7 @@ public class CustomTerrain : MonoBehaviour
         }
         terrainData.SetHeights(0, 0, heightMap);
     }
+
 
     public void LoadTexture()
     {
