@@ -18,6 +18,9 @@ public class CustomTerrainEditor : Editor
     private SerializedProperty perlinYScale;
     private SerializedProperty perlinOffsetX;
     private SerializedProperty perlinOffsetY;
+    private SerializedProperty perlinOctaves;
+    private SerializedProperty perlinPersistence;
+    private SerializedProperty perlinHeightScale;
 
     //fold outs ---------------------------------
     private bool showRandom = false;
@@ -37,6 +40,9 @@ public class CustomTerrainEditor : Editor
         perlinYScale = serializedObject.FindProperty("perlinYScale");
         perlinOffsetY = serializedObject.FindProperty("perlinOffsetY");
         perlinOffsetX = serializedObject.FindProperty("perlinOffsetX");
+        perlinOctaves = serializedObject.FindProperty("perlinOctaves");
+        perlinPersistence = serializedObject.FindProperty("perlinPersistence");
+        perlinHeightScale = serializedObject.FindProperty("perlinHeightScale");
     }
 
     public override void OnInspectorGUI()
@@ -78,6 +84,9 @@ public class CustomTerrainEditor : Editor
             EditorGUILayout.Slider(perlinYScale, 0, 0.1f, new GUIContent("Y Scale"));
             EditorGUILayout.IntSlider(perlinOffsetX, 0, 10000, new GUIContent("X Offset"));
             EditorGUILayout.IntSlider(perlinOffsetY, 0, 10000, new GUIContent("Y Offset"));
+            EditorGUILayout.IntSlider(perlinOctaves, 1, 10, new GUIContent("Octaves"));
+            EditorGUILayout.Slider(perlinPersistence, .1f, 10, new GUIContent("Persistence"));
+            EditorGUILayout.Slider(perlinHeightScale, 0, 1, new GUIContent("Height Scale"));
             if (GUILayout.Button("Add Perlin Noise"))
             {
                 terrain.Perlin();
