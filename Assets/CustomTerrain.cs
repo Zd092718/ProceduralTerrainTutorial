@@ -45,12 +45,10 @@ public class CustomTerrain : MonoBehaviour
         {
             for (int x = 0; x < heightMapResolution; x++)
             {
-                heightMap[x, y] = Utils.fBM(x * perlinXScale,
-                                            y * perlinYScale,
+                heightMap[x, y] = Utils.fBM((x + perlinOffsetX) * perlinXScale,
+                                            (y + perlinOffsetY) * perlinYScale,
                                             perlinOctaves,
-                                            perlinPersistence,
-                                            perlinOffsetX,
-                                            perlinOffsetY) * perlinHeightScale;
+                                            perlinPersistence) * perlinHeightScale;
             }
         }
         terrainData.SetHeights(0, 0, heightMap);
