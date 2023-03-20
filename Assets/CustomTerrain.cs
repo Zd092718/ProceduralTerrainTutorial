@@ -8,12 +8,15 @@ using UnityEngine;
 
 public class CustomTerrain : MonoBehaviour
 {
-    //Height Map Properties ---------------------------------------------------
+
+    #region Height Map Properties
     [SerializeField] private Vector2 randomHeightRange = new Vector2(0, 0.1f);
     [SerializeField] private Texture2D heightMapImage;
     [SerializeField] private Vector3 heightMapScale = new Vector3(1, 1, 1);
 
-    //PERLIN NOISE ----------------------------------------------------------
+    #endregion
+
+    #region Perlin Noise
     [SerializeField] private float perlinXScale = 0.01f;
     [SerializeField] private float perlinYScale = 0.01f;
     [SerializeField] private int perlinOffsetX = 0;
@@ -22,10 +25,32 @@ public class CustomTerrain : MonoBehaviour
     [SerializeField] private float perlinPersistence = 8;
     [SerializeField] private float perlinHeightScale = 0.09f;
 
+    #endregion
 
+    #region Multiple Perlin
+    [System.Serializable]
+    public class PerlinParameters
+    {
+        public float mPerlinXScale = 0.01f;
+        public float mPerlinYScale = 0.01f;
+        public int mPerlinOffsetX = 0;
+        public int mPerlinOffsetY = 0;
+        public int mPerlinOctaves = 3;
+        public float mPerlinPersistence = 8;
+        public float mPerlinHeightScale = 0.09f;
+        public bool remove = false;
+    }
+
+    public List<PerlinParameters> perlinParameters = new List<PerlinParameters>()
+    {
+        new PerlinParameters()
+    };
+
+    #endregion
 
     [SerializeField] private Terrain terrain;
     [SerializeField] private TerrainData terrainData;
+    [SerializeField] private bool resetTerrain;
 
     //public Vector2 RandomHeightRange { get => randomHeightRange; set => randomHeightRange = value; }
     //public Terrain Terrain { get => terrain; set => terrain = value; }
@@ -37,15 +62,27 @@ public class CustomTerrain : MonoBehaviour
         terrain = this.GetComponent<Terrain>();
         terrainData = terrain.terrainData;
     }
+
+
+    float[,] GetHeightMap()
+    {
+        if (!resetTerrain)
+        {
+            return terrainData.GetHeights(0, 0, terrainData.heightmapResolution, terrainData.heightmapResolution);
+        }
+        else
+            return new float[terrainData.heightmapResolution, terrainData.heightmapResolution];
+    }
+
     public void Perlin()
     {
         int heightMapResolution = terrainData.heightmapResolution;
-        float[,] heightMap = terrainData.GetHeights(0, 0, heightMapResolution, heightMapResolution);
+        float[,] heightMap = GetHeightMap();
         for (int y = 0; y < heightMapResolution; y++)
         {
             for (int x = 0; x < heightMapResolution; x++)
             {
-                heightMap[x, y] = Utils.fBM((x + perlinOffsetX) * perlinXScale,
+                heightMap[x, y] += Utils.fBM((x + perlinOffsetX) * perlinXScale,
                                             (y + perlinOffsetY) * perlinYScale,
                                             perlinOctaves,
                                             perlinPersistence) * perlinHeightScale;
@@ -54,11 +91,47 @@ public class CustomTerrain : MonoBehaviour
         terrainData.SetHeights(0, 0, heightMap);
     }
 
+    public void MultiplePerlin()
+    {
+        int heightMapResolution = terrainData.heightmapResolution;
+        float[,] heightMap = GetHeightMap();
+        for (int y = 0; y < heightMapResolution; y++)
+        {
+            for (int x = 0; x < heightMapResolution; x++)
+            {
+                foreach (PerlinParameters p in perlinParameters)
+                {
+                    heightMap[x, y] += Utils.fBM((x + p.mPerlinOffsetX) * p.mPerlinXScale,
+                                                (y + p.mPerlinOffsetY) * p.mPerlinYScale,
+                                                p.mPerlinOctaves,
+                                                p.mPerlinPersistence) * p.mPerlinHeightScale;
+                }
+            }
+        }
+        terrainData.SetHeights(0, 0, heightMap);
+    }
+
+    public void AddNewPerlin()
+    {
+        perlinParameters.Add(new PerlinParameters());
+    }
+
+    public void RemovePerlin()
+    {
+        perlinParameters.RemoveAll(p => p.remove);
+
+        if (perlinParameters.Count == 0)
+        {
+            perlinParameters.Add(new PerlinParameters());
+        }
+    }
+
+
     public void RandomTerrain()
     {
-        float[,] heightMap;
+
         int heightMapResolution = terrainData.heightmapResolution;
-        heightMap = terrainData.GetHeights(0, 0, heightMapResolution, heightMapResolution);
+        float[,] heightMap = GetHeightMap();
         for (int x = 0; x < heightMapResolution; x++)
         {
             for (int y = 0; y < heightMapResolution; y++)
@@ -72,14 +145,14 @@ public class CustomTerrain : MonoBehaviour
 
     public void LoadTexture()
     {
-        float[,] heightMap;
+
         int heightMapResolution = terrainData.heightmapResolution;
-        heightMap = terrainData.GetHeights(0, 0, heightMapResolution, heightMapResolution);
+        float[,] heightMap = GetHeightMap();
         for (int x = 0; x < heightMapResolution; x++)
         {
             for (int z = 0; z < heightMapResolution; z++)
             {
-                heightMap[x, z] = heightMapImage.GetPixel((int)(x * heightMapScale.x),
+                heightMap[x, z] += heightMapImage.GetPixel((int)(x * heightMapScale.x),
                                                           (int)(z * heightMapScale.z))
                                                           .grayscale * heightMapScale.y;
             }
@@ -89,9 +162,8 @@ public class CustomTerrain : MonoBehaviour
 
     public void ResetTerrain()
     {
-        float[,] heightMap;
         int heightMapResolution = terrainData.heightmapResolution;
-        heightMap = terrainData.GetHeights(0, 0, heightMapResolution, heightMapResolution);
+        float[,] heightMap = GetHeightMap();
         for (int x = 0; x < heightMapResolution; x++)
         {
             for (int y = 0; y < heightMapResolution; y++)
