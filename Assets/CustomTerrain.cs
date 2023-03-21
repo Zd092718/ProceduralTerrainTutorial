@@ -48,6 +48,17 @@ public class CustomTerrain : MonoBehaviour
 
     #endregion
 
+    #region Voronoi
+
+    [SerializeField] private float voronoiFallOff = 0.2f;
+    [SerializeField] private float voronoiDropOff = 0.6f;
+    [SerializeField] private float voronoiMinHeight = 0.1f;
+    [SerializeField] private float voronoiMaxHeight = 0.5f;
+    [SerializeField] private int voronoiPeaks = 5;
+    [SerializeField] private enum VoronoiType { Linear = 0, Power = 1, Combined = 2, SinPow = 3 };
+    [SerializeField] private VoronoiType voronoiType = VoronoiType.Linear;
+    #endregion
+
     [SerializeField] private Terrain terrain;
     [SerializeField] private TerrainData terrainData;
     [SerializeField] private bool resetTerrain;
@@ -72,6 +83,61 @@ public class CustomTerrain : MonoBehaviour
         }
         else
             return new float[terrainData.heightmapResolution, terrainData.heightmapResolution];
+    }
+
+    public void Voronoi()
+    {
+        float[,] heightMap = GetHeightMap();
+
+        for (int p = 0; p < voronoiPeaks; p++)
+        {
+            // Vector3 peak = new Vector3(256, 0.2f, 256);
+            Vector3 peak = new Vector3(Random.Range(0, terrainData.heightmapResolution),
+                                       Random.Range(voronoiMinHeight, voronoiMaxHeight),
+                                       Random.Range(0, terrainData.heightmapResolution)
+                                       );
+            if (heightMap[(int)peak.x, (int)peak.z] < peak.y)
+                heightMap[(int)peak.x, (int)peak.z] = peak.y;
+            else
+                continue;
+
+            Vector2 peakLocation = new Vector2(peak.x, peak.z);
+            float maxDistance = Vector2.Distance(new Vector2(0, 0), new Vector2(terrainData.heightmapResolution, terrainData.heightmapResolution));
+            for (int y = 0; y < terrainData.heightmapResolution; y++)
+            {
+                for (int x = 0; x < terrainData.heightmapResolution; x++)
+                {
+                    if (!(x == peak.x && y == peak.z))
+                    {
+                        float distanceToPeak = Vector2.Distance(peakLocation, new Vector2(x, y)) / maxDistance;
+                        float height;
+                        switch (voronoiType)
+                        {
+                            case VoronoiType.Combined:
+                                height = peak.y - distanceToPeak * voronoiFallOff -
+                                    Mathf.Pow(distanceToPeak, voronoiDropOff); //Combined
+                                break;
+                            case VoronoiType.Power:
+                                height = peak.y - Mathf.Pow(distanceToPeak, voronoiDropOff) * voronoiFallOff; //Power
+                                break;
+                            case VoronoiType.SinPow:
+                                height = peak.y - Mathf.Pow(distanceToPeak * 3, voronoiFallOff) -
+                                    Mathf.Sin(distanceToPeak * 2 * Mathf.PI) / voronoiDropOff;
+                                break;
+                            default:
+                                height = peak.y - distanceToPeak * voronoiFallOff; //Linear
+                                break;
+                        }
+                        if (heightMap[x, y] < height)
+                        {
+                            heightMap[x, y] = height;
+                        }
+                    }
+                }
+            }
+
+        }
+        terrainData.SetHeights(0, 0, heightMap);
     }
 
     public void Perlin()
@@ -173,6 +239,8 @@ public class CustomTerrain : MonoBehaviour
         }
         terrainData.SetHeights(0, 0, heightMap);
     }
+
+
     private void Awake()
     {
         SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
